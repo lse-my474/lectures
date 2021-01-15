@@ -1,0 +1,48 @@
+developer,tn,technology,fn,test,target,tp,antibody,fp
+"Assure Tech. (Hangzhou Co., Ltd)",79,Lateral Flow,0,Assure COVID-19 IgG/IgM Rapid Test Device,Spike and Nucleocapsid,30,IgM,1
+"Assure Tech. (Hangzhou Co., Ltd)",80,Lateral Flow,3,Assure COVID-19 IgG/IgM Rapid Test Device,Spike and Nucleocapsid,27,IgG,0
+"Assure Tech. (Hangzhou Co., Ltd)",79,Lateral Flow,0,Assure COVID-19 IgG/IgM Rapid Test Device,Spike and Nucleocapsid,30,Combined,1
+"Beijing Wantai Biological Pharmacy Enterprise Co., Ltd.",78,ELISA,1,WANTAI SARS-CoV-2 Ab ELISA,Spike,29,Pan-Ig,2
+"Beijing Wantai Biological Pharmacy Enterprise Co., Ltd.",79, Lateral Flow,0,WANTAI SARS-CoV-2 Ab Rapid Test,Spike,30,Pan-Ig,1
+Biocan Diagnostics Inc.,78, Lateral Flow,3,Tell Me Fast Novel Coronavirus (COVID-19) IgG/IgM Antibody Test,Spike and Nucleocapsid,27,IgM,1
+Biocan Diagnostics Inc.,76, Lateral Flow,2,Tell Me Fast Novel Coronavirus (COVID-19) IgG/IgM Antibody Test,Spike and Nucleocapsid,28,IgG,3
+Biocan Diagnostics Inc.,76, Lateral Flow,2,Tell Me Fast Novel Coronavirus (COVID-19) IgG/IgM Antibody Test,Spike and Nucleocapsid,28,Combined,3
+Biohit Healthcare (Hefei),76, Lateral Flow,1,Biohit SARS-CoV-2 IgM/IgG Antibody Test Kit,Nucleocapsid,29,IgM,4
+Biohit Healthcare (Hefei),76, Lateral Flow,1,Biohit SARS-CoV-2 IgM/IgG Antibody Test Kit,Nucleocapsid,29,IgG,4
+Biohit Healthcare (Hefei),76, Lateral Flow,1,Biohit SARS-CoV-2 IgM/IgG Antibody Test Kit,Nucleocapsid,29,Combined,4
+EUROIMMUN,80,ELISA,3,SARS-COV-2 ELISA (IgG),Spike,27,IgG,0
+Hangzhou Biotest Biotech,80,Lateral Flow,0,RightSign COVID-19 IgG/IgM Rapid Test Cassette,Spike,30,IgM,0
+Hangzhou Biotest Biotech,80,Lateral Flow,2,RightSign COVID-19 IgG/IgM Rapid Test Cassette,Spike,28,IgG,0
+Hangzhou Biotest Biotech,80,Lateral Flow,0,RightSign COVID-19 IgG/IgM Rapid Test Cassette,Spike,30,Combined,0
+Hangzhou Laihe Biotech,80,Lateral Flow,1,LYHER Novel Coronavirus (2019-nCoV) IgM/IgG Antibody Combo Test Kit (Colloidal Gold),Spike,29,IgM,0
+Hangzhou Laihe Biotech,79,Lateral Flow,0,LYHER Novel Coronavirus (2019-nCoV) IgM/IgG Antibody Combo Test Kit (Colloidal Gold),Spike,30,IgG,1
+Hangzhou Laihe Biotech,79,Lateral Flow,0,LYHER Novel Coronavirus (2019-nCoV) IgM/IgG Antibody Combo Test Kit (Colloidal Gold),Spike,30,Combined,1
+Healgen,80,Lateral Flow,0,COVID-19 IgG/IgM Rapid Test Cassette,Spike,30,IgM,0
+Healgen,78,Lateral Flow,1,COVID-19 IgG/IgM Rapid Test Cassette,Spike,29,IgG,2
+Healgen,78,Lateral Flow,0,COVID-19 IgG/IgM Rapid Test Cassette,Spike,30,Combined,2
+InBios,80,ELISA,0,SCoV-2 Detect IgG ELISA,Spike,30,IgG,0
+"InBios International, Inc.",79,ELISA,1,SCoV-2 Detect IgM ELISA,Spike,29,IgM,1
+"Innovita (Tangshan) Biological Technology Co., Ltd.",79,Lateral Flow,2,Innovita 2019-nCoV Ab Test (Colloidal Gold),Spike and Nucleocapsid,28,IgM,1
+"Innovita (Tangshan) Biological Technology Co., Ltd.",79,Lateral Flow,2,Innovita 2019-nCoV Ab Test (Colloidal Gold),Spike and Nucleocapsid,28,IgG,1
+"Innovita (Tangshan) Biological Technology Co., Ltd.",78,Lateral Flow,0,Innovita 2019-nCoV Ab Test (Colloidal Gold),Spike and Nucleocapsid,30,Combined,2
+Jiangsu Well Biotech,93,Lateral Flow,4,Orawell IgM/IgG Rapid Test,Spike,54,IgM,4
+Jiangsu Well Biotech,96,Lateral Flow,0,Orawell IgM/IgG Rapid Test,Spike,58,IgG,1
+Jiangsu Well Biotech,92,Lateral Flow,0,Orawell IgM/IgG Rapid Test,Spike,58,Combined,5
+"Megna Health, Inc.",78,Lateral Flow,5,Rapid COVID-19 IgM/IgG Combo Test Kit,Nucleocapsid,25,IgM,2
+"Megna Health, Inc.",78,Lateral Flow,0,Rapid COVID-19 IgM/IgG Combo Test Kit,Nucleocapsid,30,IgG,2
+"Megna Health, Inc.",76,Lateral Flow,0,Rapid COVID-19 IgM/IgG Combo Test Kit,Nucleocapsid,30,Combined,4
+"NanoEntek America, Inc.",79,FIA,1,FREND COVID-19 total Ab,Nucleocapsid,29,(IgM / IgG),1
+"Nirmidas Biotech, Inc.",95,Lateral Flow,4,Nirmidas COVID-19 (SARS-CoV-2) IgM/IgG Antibody Detection Kit,Spike,54,IgM,2
+"Nirmidas Biotech, Inc.",97,Lateral Flow,7,Nirmidas COVID-19 (SARS-CoV-2) IgM/IgG Antibody Detection Kit,Spike,51,IgG,0
+"Nirmidas Biotech, Inc.",95,Lateral Flow,2,Nirmidas COVID-19 (SARS-CoV-2) IgM/IgG Antibody Detection Kit,Spike,56,Combined,2
+Salofa Oy,80,Lateral Flow,3,Sienna-Clarity COVIBLOCK COVID-19 IgG/IgM Rapid Test Cassette,Spike,27,IgM,0
+Salofa Oy,79,Lateral Flow,2,Sienna-Clarity COVIBLOCK COVID-19 IgG/IgM Rapid Test Cassette,Spike,28,IgG,1
+Salofa Oy,79,Lateral Flow,2,Sienna-Clarity COVIBLOCK COVID-19 IgG/IgM Rapid Test Cassette,Spike,28,Combined,1
+"Sugentech, Inc.",80,Lateral Flow,1,SGTi-flex COVID-19 IgG,Spike and Nucleocapsid,29,IgG,0
+TBG Biotechnology Corp.,76,Lateral Flow,2,TBG SARS-CoV-2 IgG / IgM Rapid Test Kit,Spike and Nucleocapsid,28,IgM,4
+TBG Biotechnology Corp.,77,Lateral Flow,2,TBG SARS-CoV-2 IgG / IgM Rapid Test Kit,Spike and Nucleocapsid,28,IgG,3
+TBG Biotechnology Corp.,76,Lateral Flow,2,TBG SARS-CoV-2 IgG / IgM Rapid Test Kit,Spike and Nucleocapsid,28,Combined,4
+Thermo Fisher Scientific,78,ELISA,1,OmniPATH COVID-19 Total Antibody ELISA Test,Spike,29,Pan-Ig,2
+"Xiamen Biotime Biotechnology Co., Ltd.",79,Lateral Flow,0,BIOTIME SARS-CoV-2 IgG/IgM Rapid Qualitative Test,Spike,30,IgM,1
+"Xiamen Biotime Biotechnology Co., Ltd.",78,Lateral Flow,1,BIOTIME SARS-CoV-2 IgG/IgM Rapid Qualitative Test,Spike,29,IgG,2
+"Xiamen Biotime Biotechnology Co., Ltd.",77,Lateral Flow,0,BIOTIME SARS-CoV-2 IgG/IgM Rapid Qualitative Test,Spike,30,Combined,3
