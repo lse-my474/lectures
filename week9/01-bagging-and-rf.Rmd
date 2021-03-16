@@ -1,0 +1,139 @@
+---
+title: "Bagging and random forest"
+author: "Friedrich Geiecke"
+date: "15 March 2021"
+output: html_document
+---
+
+Loading packages:
+
+```{r}
+library("randomForest")
+library("pROC")
+#install.packages("caret", dependencies = c("Depends", "Imports"))
+library("caret")
+```
+
+This notebook is a brief illustration of bagging and random forests in R. As an example, we use a sample of this [dataset](https://www.kaggle.com/mlg-ulb/creditcardfraud). For a range of credit card transactions, the goal is to predict which ones were fraudulent and which ones not.
+
+Loading the dataset:
+
+```{r}
+dataset <- read.csv("dataset.csv")
+```
+
+Training and test split (the validation dataset will be used in the next notebook, but the same datasets make outcomes more comparable):
+
+```{r}
+# Setting a seed
+set.seed(123)
+
+# Indices of training, validation, and test observations
+all_indices <- 1:nrow(dataset)
+all_indices <- sample(all_indices)
+training_indices <- all_indices[1:800]
+validation_indices <- all_indices[801:1000]
+test_indices <- all_indices[1001:1476]
+
+# Dataset split
+training_y <- dataset[training_indices,31]
+training_dataset <- dataset[training_indices,]
+test_X <- dataset[test_indices,-31]
+test_y <- as.vector(dataset[test_indices,31])
+
+# Making the label a factor for the randomForest package
+training_dataset$class <- factor(training_dataset$class)
+test_y <- factor(test_y)
+```
+
+
+### 1.Simplest benchmark
+
+```{r}
+# The majority of the cases is no fraud
+mean(as.numeric(training_y))
+
+# Thus, always predict no fraud
+test_y_hat_simple <- factor(rep(0, nrow(test_X)), levels = c("0", "1"))
+
+# Confusion matrix
+confusionMatrix(data = test_y, reference = test_y_hat_simple, positive = "1")
+
+# AUC
+auc(roc(test_y, rep(0,length(test_y))))
+```
+
+This is good to keep in mind when the sample is highly imbalanced. When 98% of observations are 0, then this benchmark would achieve an accuracy of 98% (but have a sensitivity of zero).
+
+
+### 2. Logistic regression
+
+```{r}
+# Estimation
+model_lr = glm(class~., data=training_dataset, family=binomial, maxit = 100)
+
+# Prediction
+test_y_hat_prob_lr = predict(model_lr, newdata = test_X, type="response")
+test_y_hat_lr <- rep(0, length(test_y_hat_prob_lr))
+test_y_hat_lr[test_y_hat_prob_lr>0.5] <- 1
+test_y_hat_lr <- factor(test_y_hat_lr)
+
+# Confusion matrix
+confusionMatrix(data = test_y, reference = test_y_hat_lr, positive = "1")
+
+# AUC
+auc(roc(test_y, test_y_hat_prob_lr))
+```
+
+
+### 3. Bagging
+
+Bagging is just a random forest with m=p:
+
+```{r}
+# Estimation
+model_bag = randomForest(class~., data=training_dataset, mtry = 500, m = (ncol(training_dataset)-1), importance=TRUE)
+
+# Prediction
+test_y_hat_prob_bag = predict(model_bag, newdata = test_X, type="prob")[,2]
+test_y_hat_bag = predict(model_bag, newdata = test_X)
+
+# Confusion matrix
+confusionMatrix(data = test_y, reference = test_y_hat_bag, positive = "1")
+
+# AUC
+auc(roc(test_y, test_y_hat_prob_bag))
+```
+
+
+### 4. Random forest
+
+```{r}
+# Estimation
+model_rf = randomForest(class~., data=training_dataset, mtry = 500, m = round(sqrt(ncol(training_dataset)-1), 0), importance=TRUE)
+
+# Prediction
+test_y_hat_prob_rf = predict(model_rf, newdata = test_X, type="prob")[,2]
+test_y_hat_rf = predict(model_rf, newdata = test_X)
+
+# Confusion matrix
+confusionMatrix(data = test_y, reference = test_y_hat_rf, positive = "1")
+
+# AUC
+auc(roc(test_y, test_y_hat_prob_rf))
+```
+
+
+Variable importance:
+
+```{r fig.height = 4, fig.width = 3}
+varImpPlot(model_rf, main = "Variable importance")
+importance(model_rf)
+```
+
+
+References
+
+- The dataset is a sample from https://www.kaggle.com/mlg-ulb/creditcardfraud / https://mlg.ulb.ac.be/wordpress/
+  
+
