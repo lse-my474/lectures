@@ -50,7 +50,7 @@ blue <- votes$party == "D"
 
 Clearly, there is some separation between the two parties along PC1. However, there does not appear to be much separation between the parties on PC2.
 
-Note that only one Republican and one Democrat are on the respective opposite side of of the zero mean of PC1. Hence, classifying with the PC1 scores would almost give a perfect fit here.
+Note that only one Democrat is on the respective opposite side of of the zero mean of PC1 here. Hence, classifying with the PC1 scores would almost give a perfect fit here.
 
 We can also compute how much of the variance is explained by each principal component (only the first 10 are printed here):
 
