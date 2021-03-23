@@ -1,0 +1,95 @@
+---
+title: "Dimension reduction and clustering on voting data"
+date: "23 March 2021"
+output: html_document
+---
+
+In this brief notebook, we will look at some example involving PCA and k-means clustering.
+
+Below is data capturing votes for a given roll call in 2011. The votes were compiled from http://clerk.house.gov. We have the votes (or absence of a vote) for each member of the House of Representatives on over 939 roll call votes in 2011 with 426 members having all votes. Not surprisingly, these votes are clearly structured across party lines.
+
+Reading in the data:
+
+```{r}
+votes <- read.table("2011_cleaned_votes.csv", header = TRUE, sep = ";")
+head(votes)
+```
+
+```{r}
+dim(votes)
+```
+
+There have been 947 votes and 426 politicians. Let us apply principal component analysis to these data to see whether we can represent the information from the votes well in fewer variables. Since all columns here are measured in the same units, i.e. a numeric vote value, the `scale` argument is set to `FALSE`. Note that usually it is important to scale if variables are in different units. The default in `prcomp` is `FALSE`, so make sure to set it to `TRUE` in these cases.
+
+```{r}
+pca_output <- prcomp(votes[,2:ncol(votes)], scale = FALSE)
+```
+
+Plotting the scores for the first two principal components:
+
+```{r}
+z1 <- pca_output$x[,1]
+z2 <- pca_output$x[,2]
+plot(z1, z2, xlab = "PC1", ylab = "PC2")
+```
+
+There seem to be clear clusters in voting behaviour.
+
+Let us repeat the plot, now with the partisan affiliation of the legislator labeled.
+
+```{r}
+red <- votes$party == "R"
+blue <- votes$party == "D"
+
+{
+  plot(z1, z2, type = "n", xlab = "PC1", ylab = "PC2")
+  points(z1[red], z2[red], pch = 23, bg = "red")
+  points(z1[blue], z2[blue], pch = 23, bg = "blue")
+}
+```
+
+Clearly, there is some separation between the two parties along PC1. However, there does not appear to be much separation between the parties on PC2.
+
+Note that only one Republican and one Democrat are on the respective opposite side of of the zero mean of PC1. Hence, classifying with the PC1 scores would almost give a perfect fit here.
+
+We can also compute how much of the variance is explained by each principal component (only the first 10 are printed here):
+
+```{r}
+pca_var <- pca_output$sdev^2
+total_var <- sum(pca_var)
+pca_var[1:10]/total_var
+```
+
+In fact, PC1 carries more variance than all other principal components combined.
+
+## 2. Clustering
+
+Lastly, let us apply k-means clustering to the data and see what cluster assignment we would find. We run 20 random initial assignments and the function chooses the best solution from them. Again, this is a rare case of all features having the same units here, so the following is not standardised.
+
+```{r}
+set.seed(24)
+kmeans_output <- kmeans(votes[,2:ncol(votes)], centers = 2, nstart = 20)
+```
+
+Now let us compare the assigned clusters to the actual parties:
+
+```{r}
+kmeans_output$cluster[1:20]
+votes$party[1:20]
+```
+
+The initialisation seems to have implied the 1-label for what we know is Republican. So let us rename the labels assigned by the k-means algorithm and see how the two clusters found in the voting data through kmeans clustering compare to the actual party memberships.
+
+```{r}
+cluster_assignments <- kmeans_output$cluster
+cluster_assignments[cluster_assignments == 2] <- "D"
+cluster_assignments[cluster_assignments == 1] <- "R"
+```
+
+
+```{r}
+sum(votes$party == cluster_assignments)
+length(cluster_assignments)
+```
+
+Almost all party memberships could be detected from voting behaviour in this dataset.
