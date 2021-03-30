@@ -103,3 +103,8 @@ evaluate(model, cifar$test$x, cifar$test$y, verbose = 0)
 ```
 
 Also here you can train the model for longer, or try out different architectures and hyper-parameters to see whether you can increase the accuracy.
+
+
+References
+
+  - https://tensorflow.rstudio.com/tutorials/advanced/images/cnn/
