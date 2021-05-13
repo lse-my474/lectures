@@ -1,0 +1,339 @@
+---
+title: "LightGBM"
+author: "Friedrich Geiecke"
+date: "15 March 2021"
+output: html_document
+---
+
+```{r}
+library("lightgbm")
+library("dplyr")
+library("pROC")
+library("caret")
+```
+
+This notebook gives an introduction to LightGBM as an example of a state of the art algorithm in statistical machine learning.
+
+
+### 1. Dataset
+
+Loading the dataset:
+
+```{r}
+dataset <- read.csv("dataset.csv")
+```
+
+Training, validation, and test split:
+
+```{r}
+# Setting a seed
+set.seed(123)
+
+# Indices of training, validation, and test observations
+all_indices <- 1:nrow(dataset)
+all_indices <- sample(all_indices)
+
+training_indices <- all_indices[1:800]
+validation_indices <- all_indices[801:1000]
+test_indices <- all_indices[1001:1476]
+```
+
+Next, we create a lightgbm dataset which is necessary when using this package. Note that to do this, we first have to transform categorical values in the dataframe into integers. This can be done with the `lgb.convert_with_rules` function. Afterwards we transform the dataframe into a matrix which is now possible as all columns are numeric.
+
+This carries with it, however, that we need to signal to the algorithm which column names actually correspond to categorical rather than numerical features. Creating the training and a validation dataset:
+
+```{r}
+# Transforming features and the dataframe
+dataset <- lgb.convert_with_rules(data = dataset)$data %>% as.matrix()
+     
+# In dataset with categoricals, add the feature names here
+categoricals <- c()
+
+# Training dataset
+training_dataset <- lgb.Dataset(data = dataset[training_indices,-ncol(dataset)],
+                                label = dataset[training_indices,ncol(dataset)],
+                                categorical_feature = categoricals)
+
+# Validation dataset
+validation_dataset <- lgb.Dataset.create.valid(dataset = training_dataset,
+                                               data = dataset[validation_indices,-ncol(dataset)],
+                                               label = dataset[validation_indices,ncol(dataset)])
+
+# test_X and test_y as simple matrices/vectors
+test_X <- dataset[test_indices,-ncol(dataset)]
+test_y <- as.numeric(dataset[test_indices,ncol(dataset)])
+```
+
+
+### 2. Training a model
+
+First, we need to set some parameters. For a regression normal loss/objective, e.g. choose objective = "mse", or e.g. choose "gamma" or "poisson" if only positive value need to be predicted. For regression with outliers, try e.g. the "Huber" loss function if you want to increase the fit __on the non-outlier__ observations. Here we look at our binary classification example and hence choose a binary loss/objective function (or "multiclass" for more than two classes)
+
+Secondly, we need to choose a `metric`. This is used to evaluate the model on the training and validation datasets. We could choose the binary loss here as well, but also e.g. the area under the curve (AUC) or others. So the _objective/loss function_ is what the algorithm minimises in training, and the _metric_ is what it computes during evaluation. They can be the same, but do not have to be.
+
+Commonly chosen/tuned hyper-parameters are:
+
+- `is_unbalance`: If `TRUE` its re-weighting can increase the performance of a model trained on an unbalanced dataset, but results in poorer estimates of individual class probabilities (alternatively see `scale_pos_weight` for more advanced re-weighting)
+- `learning_rate`: The shrinkage parameter from the lecture slides
+- `num_leaves`: The maximum numbers of leaves in one tree
+- `max_depth`: Maximum depth of the leaf-wise grown trees
+- `feature_fraction`: The fraction of features chosen randomly before training a tree
+- `bagging_fraction`: The fraction of data chosen randomly before training a tree
+
+For full details on the many hyper-parameters of the model, see https://lightgbm.readthedocs.io/en/latest/Parameters.html
+
+The following trains a lightgbm model. To reduce the chance of over-fitting, we use early stopping: Because we supplied a validation set, the model detects when the _metric_ does not improve for 50 episodes on the validation set and stops training at this time (this cannot be done on the training dataset with the metric mechanically decreasing).
+
+```{r}
+params <- list(objective = "binary", metric = "auc", is_unbalance = TRUE,
+               learning_rate = 0.1, max_depth = 2, early_stopping = 50)
+```
+
+```{r}
+model <- lgb.train(
+  params = params,
+  data = training_dataset,
+  nrounds = 10000, # note: needs to be larger for very small learning rates
+  valids = list(training = training_dataset, validation = validation_dataset),
+  verbose = -1
+)
+```
+
+As the example in this illustration is very simple (e.g. the dataset is small for such a model and many features are highly predictive), the fit is already very good:
+
+```{r}
+# Test set accuracy
+test_y_hat_prob_lgb <- predict(model, test_X)
+test_y_hat_lgb <- rep(0, length(test_y_hat_prob_lgb))
+test_y_hat_lgb[test_y_hat_prob_lgb>0.5] <- 1
+
+# Confusion matrix
+confusionMatrix(data = factor(test_y), reference = factor(test_y_hat_lgb), positive = "1")
+
+# AUC
+auc(roc(test_y, test_y_hat_prob_lgb))
+```
+
+Sometimes short trees with `max_depth` around 2 and early stopping can produce outcomes which are hard to beat even with parameter search.
+
+The LightGBM package also allows to look at variable importance:
+
+```{r}
+boosting_importance <- lgb.importance(model, percentage = TRUE)
+lgb.plot.importance(boosting_importance)
+```
+
+To obtain intuition that these variable importance measures have to be interpreted with care, try to remove `v14` and run the above again. You will find roughly the same accuracy and now another principal component/feature having the highest importance value which was previously hardly visible. This keeps happening if you successively remove features as most of them have a lot of signal for the outcome in this dataset.
+
+
+### 3. Random search
+
+We illustrate the random search with the same small dataset to keep things comparable and decrease training time. While there is limited benefit in this example, the code is meant to serve as a starting point in other work. In general, due to their many hyper-parameters, careful tuning is important for these advanced boosting models (the same holds e.g. for `XGBoost`). Random hyper-parameter tuning can also be very useful for neural networks. 
+
+```{r}
+
+random_search_lgbm <- function(parameter_values_fixed,
+                              n_draws,
+                              training_dataset,
+                              seed_int) {
+
+  #
+  #
+  # Inputs
+  #
+  # - parameter_values_fixed: A dictionary of fixed lightgbm parameters
+  # - n_draws: The amount of random parameter combinations to try
+  # - training_dataset: A lightgbm dataset
+  # - seed_int: An integer to set a pseudo random number seed
+  #
+  #
+  # Output
+  #
+  # - A data.frame starting with the lowest CV loss/the highest CV AUC that was found
+  #
+  #
+
+  
+  ## 1. Status update
+  
+  print("Starting the random hyper-parameter search ..")
+  
+
+  ## 2. Create a dataframe to store the outcomes
+
+  search_output <- data.frame(learning_rate = numeric(),
+                              num_leaves = numeric(),
+                              max_depth = numeric(),
+                              feature_fraction = numeric(),
+                              bagging_fraction = numeric(),
+                              is_unbalance = logical(),
+                              score = numeric())
+  
+  
+  ## 3. Training the models
+  
+  # Set seed
+  set.seed(seed_int)
+  
+  # Iterations
+  for (ii in 1:n_draws) {
+    
+    # Picking a random point in the hyper-parameter space and storing it in the
+    # search output dataframe
+    
+    # Runs from ca. 0.01 to 0.5, with smaller values being more likely
+    search_output[ii, "learning_rate"] <- exp(runif(1, min = -4.6, max = -0.7)) 
+    
+    search_output[ii, "num_leaves"] <- round(runif(1, min = 2, max = 200))
+    search_output[ii, "max_depth"] <- round(runif(1, min = 1, max = 30))
+    search_output[ii, "feature_fraction"] <- runif(1, min = 0, max = 1)
+    search_output[ii, "bagging_fraction"] <- runif(1, min = 0, max = 1)
+    search_output[ii, "is_unbalance"] <- sample(c(TRUE, FALSE), 1)
+    
+    
+    # Transforming the parameter values into a list
+    parameter_values_variable <- as.list(search_output[ii, !(colnames(search_output) %in% "score")])
+
+    # Combining with fixed parameters
+    current_params <- c(parameter_values_fixed, parameter_values_variable)
+    
+    # Cross validation
+    current_cv <- lgb.cv(
+      params = current_params,
+      data = training_dataset,
+      nrounds = 500,
+      nfold = 5,
+      seed = seed_int,
+      verbose = -1,
+    )
+
+    # Storing the score in the final boosting round
+    search_output[ii,"score"] <- current_cv$record_evals$valid$auc$eval[[500]]
+    
+    # Status update
+    if (ii %% 50 == 0) {
+      
+      print(sprintf("%s/%s models trained.", ii, n_draws))
+      
+    }
+    
+  }
+  
+  
+  # Sorting to obtain parameter combination with the best score first
+  search_output <- search_output[order(-search_output$score),]  # note: this has to be ascending for losses!
+  
+  
+  return(search_output)
+  
+}
+
+
+
+```
+
+Running the search:
+
+```{r}
+parameter_values_fixed <- list(objective = "binary",
+                               metric = "auc")
+
+random_search_output <- random_search_lgbm(parameter_values_fixed = parameter_values_fixed,
+                                           n_draws = 200,
+                                           training_dataset = training_dataset,
+                                           seed_int = 474)
+```
+
+
+```{r}
+head(random_search_output, 5)
+```
+
+
+```{r}
+tail(random_search_output, 5)
+```
+
+Note that when you evaluate outcomes of such searches, it is important to check whether optima seem to be in the interior of the parameter space and not at its borders. In example above, if all optimal values would e.g. be around `max_depth = 30`, then we should re-run the search with larger `max_depth` values to prevent there being values outside our ranges that dominate the scores of the values we searched over.
+
+The example e.g. indicates that very low feature fractions might to be suboptimal here. For a larger dataset and a more challenging problem, we could now narrow into parts of the space with with another search.
+
+
+### 4. Re-training the model
+
+```{r}
+# Seed 474 and 200 draws
+params <- list(objective = "binary", metric = "auc", is_unbalance = FALSE,
+               learning_rate = 0.38385945, num_leaves = 30, max_depth = 24,
+               feature_fraction = 0.9418710, bagging_fraction = 0.9696067)
+
+
+model <- lgb.train(
+  params = params,
+  data = training_dataset,
+  nrounds = 1000,
+  verbose = -1
+)
+```
+
+
+```{r}
+# Test set accuracy
+test_y_hat_prob_lgb <- predict(model, test_X)
+test_y_hat_lgb <- rep(0, length(test_y_hat_prob_lgb))
+test_y_hat_lgb[test_y_hat_prob_lgb>0.5] <- 1
+
+# Confusion matrix
+confusionMatrix(data = factor(test_y), reference = factor(test_y_hat_lgb), positive = "1")
+
+# AUC
+auc(roc(test_y, test_y_hat_prob_lgb))
+```
+
+Re-training the model with the hyper-parameters from the search yields a marginally higher area under the curve and accuracy, and a higher sensitivity for this dataset (and seed).
+
+
+### 5. Alternative formulation of the random search
+
+Another approach is left as an exercise It does not work well with the small sample here, but it can decrease the time of the random search substantially and therefore be very helpful for search with larger datasets that require more time to train individual models. To speed up training in the random search, we could rewrite the `random_search_lgbm` function such that it includes early stopping rounds and a larger maximum number of boosting rounds/trees (which will now not overfit because early stopping will stop the training as soon as the validation metric does not improve for n rounds). In detail, one could e.g. change the code such that:
+
+```{r, eval = FALSE}
+
+# ...
+
+    # Training
+    current_cv <- lgb.cv(
+      params = current_params,
+      data = training_dataset,
+      nrounds = 10000, # will likely never be reached here
+      early_stopping = 50,
+      nfold = 5,
+      seed = seed_int,
+      verbose = -1,
+    )
+
+# ...
+
+```
+
+Then instead of the last boosting round's evaluation score, we would store the best score and the best boosting round / iteration (`current_cv$best_score` and `current_cv$best_iter`) both as columns in the `search_output` dataframe. After the search, when applying the model to the test dataset, we would grow exactly as many trees as the best iter value (or slighly more or less depending on some further out of sample evaluation) and get rid of the early stopping. It has to be checked how well this works and datasets have to be larger, but it can decrease the training time as many models in the random search will only have a few trees due to the early stopping.
+
+
+### 6. Additional notes and readings
+
+It is always important to check these advanced models against benchmark models to see whether they actually improve performance for a given problem (or rather decrease it due to small datasets or other particularities). In some cases they can allow to reach the last couple of percent. Furthermore, they are extremely flexible through their wide range of loss functions and hyper-parameters. This makes them helpful to approach many different problems with one model and careful problem specific tuning.
+
+Tuning: https://lightgbm.readthedocs.io/en/latest/Parameters-Tuning.html and e.g. https://towardsdatascience.com/understanding-lightgbm-parameters-and-how-to-tune-them-6764e20c6e5b
+
+Parameters: https://lightgbm.readthedocs.io/en/latest/Parameters.html
+
+R Package: https://lightgbm.readthedocs.io/en/latest/R/reference/
+
+
+
+Further references
+
+- https://lightgbm.readthedocs.io/en/l
+- The dataset is a sample from https://www.kaggle.com/mlg-ulb/creditcardfraud / https://mlg.ulb.ac.be/wordpress/
+  
+
