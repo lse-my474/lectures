@@ -14,7 +14,6 @@ library("caret")
 
 This notebook gives an introduction to LightGBM as an example of a state of the art algorithm in statistical machine learning.
 
-
 ### 1. Dataset
 
 Loading the dataset:
@@ -38,7 +37,7 @@ validation_indices <- all_indices[801:1000]
 test_indices <- all_indices[1001:1476]
 ```
 
-Next, we create a lightgbm dataset which is necessary when using this package. Note that to do this, we first have to transform categorical values in the dataframe into integers. This can be done with the `lgb.convert_with_rules` function. Afterwards we transform the dataframe into a matrix which is now possible as all columns are numeric.
+Next, we create a lightgbm dataset which is necessary when using this package. Note that to do this, we first have to transform categorical values in the data frame into integers. This can be done with the `lgb.convert_with_rules` function. Afterwards we transform the data frame into a matrix which is now possible as all columns are numeric.
 
 This carries with it, however, that we need to signal to the algorithm which column names actually correspond to categorical rather than numerical features. Creating the training and a validation dataset:
 
@@ -254,9 +253,9 @@ head(random_search_output, 5)
 tail(random_search_output, 5)
 ```
 
-Note that when you evaluate outcomes of such searches, it is important to check whether optima seem to be in the interior of the parameter space and not at its borders. In example above, if all optimal values would e.g. be around `max_depth = 30`, then we should re-run the search with larger `max_depth` values to prevent there being values outside our ranges that dominate the scores of the values we searched over.
+Note that when you evaluate outcomes of such searches, it is important to check whether optima seem to be in the interior of the parameter space and not at its boundaries. In the example above, if all optimal values were e.g. around `max_depth = 30`, then we should re-run the search with larger `max_depth` values to prevent there being values outside our ranges that dominate the scores of the values we searched over.
 
-The example e.g. indicates that very low feature fractions might to be suboptimal here. For a larger dataset and a more challenging problem, we could now narrow into parts of the space with with another search.
+The example e.g. indicates that very low feature fractions might to be sub-optimal here. For a larger dataset and a more challenging problem, we could now narrow into parts of the space with with another search.
 
 
 ### 4. Re-training the model
@@ -295,7 +294,7 @@ Re-training the model with the hyper-parameters from the search yields a margina
 
 ### 5. Alternative formulation of the random search
 
-Another approach is left as an exercise It does not work well with the small sample here, but it can decrease the time of the random search substantially and therefore be very helpful for search with larger datasets that require more time to train individual models. To speed up training in the random search, we could rewrite the `random_search_lgbm` function such that it includes early stopping rounds and a larger maximum number of boosting rounds/trees (which will now not overfit because early stopping will stop the training as soon as the validation metric does not improve for n rounds). In detail, one could e.g. change the code such that:
+Another approach is left as an exercise. It does not work well with the small sample here, but can decrease the time of the random search substantially and therefore be very helpful for search with larger datasets that require more time to train individual models. To speed up training in the random search, we could rewrite the `random_search_lgbm` function such that it includes early stopping rounds and a larger maximum number of boosting rounds/trees (which will now not overfit because early stopping will stop the training as soon as the validation metric does not improve for n rounds). In detail, one could e.g. change the code such that:
 
 ```{r, eval = FALSE}
 
@@ -321,7 +320,8 @@ Then instead of the last boosting round's evaluation score, we would store the b
 
 ### 6. Additional notes and readings
 
-It is always important to check these advanced models against benchmark models to see whether they actually improve performance for a given problem (or rather decrease it due to small datasets or other particularities). In some cases they can allow to reach the last couple of percent. Furthermore, they are extremely flexible through their wide range of loss functions and hyper-parameters. This makes them helpful to approach many different problems with one model and careful problem specific tuning.
+It is always important to check these advanced models against benchmark models to see whether they actually improve performance for a given problem (or rather decrease it due to small datasets or other particularities). In some cases they can allow to reach the last couple of percent. This can make these models win prediction competitions or translate into considerable financial gains in certain business use cases. Furthermore, the models are very flexible through their wide range of loss functions and hyper-parameters. This makes them useful for approaching many different problems with one framework and careful problem specific tuning.
+
 
 Tuning: https://lightgbm.readthedocs.io/en/latest/Parameters-Tuning.html and e.g. https://towardsdatascience.com/understanding-lightgbm-parameters-and-how-to-tune-them-6764e20c6e5b
 
