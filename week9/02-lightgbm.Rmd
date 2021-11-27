@@ -294,7 +294,7 @@ Re-training the model with the hyper-parameters from the search yields a margina
 
 ### 5. Alternative formulation of the random search
 
-Another approach is left as an exercise. It does not work well with the small sample here, but can decrease the time of the random search substantially and therefore be very helpful for search with larger datasets that require more time to train individual models. To speed up training in the random search, we could rewrite the `random_search_lgbm` function such that it includes early stopping rounds and a larger maximum number of boosting rounds/trees (which will now not overfit because early stopping will stop the training as soon as the validation metric does not improve for n rounds). In detail, one could e.g. change the code such that:
+Another approach is left as an exercise. It does not work well with the small training sample here, but can decrease the time of the random search substantially and therefore be very helpful for search with larger datasets that require more time to train individual models. To speed up training in the random search, we could rewrite the `random_search_lgbm` function such that it includes early stopping rounds and a larger maximum number of boosting rounds/trees (which will now not overfit because early stopping will stop the training as soon as the validation metric does not improve for n rounds). In detail, one could e.g. change the code such that:
 
 ```{r, eval = FALSE}
 
@@ -315,7 +315,7 @@ Another approach is left as an exercise. It does not work well with the small sa
 
 ```
 
-Then instead of the last boosting round's evaluation score, we would store the best score and the best boosting round / iteration (`current_cv$best_score` and `current_cv$best_iter`) both as columns in the `search_output` dataframe. After the search, when applying the model to the test dataset, we would grow exactly as many trees as the best iter value (or slighly more or less depending on some further out of sample evaluation) and get rid of the early stopping. It has to be checked how well this works and datasets have to be larger, but it can decrease the training time as many models in the random search will only have a few trees due to the early stopping.
+Then instead of the last boosting round's evaluation score, we would store the best score and the best boosting round / iteration (`current_cv$best_score` and `current_cv$best_iter`) both as columns in the `search_output` dataframe. After the search, when re-training the model on a full dataset, we would get rid of early stopping and instead grow as many trees as the best iter value from the search (or some few more trees if the full dataset is larger - check whether the loss is still sharply declining during training then, and if it is, increase the number of iterations/trees). It has to be checked how well this works and datasets have to be larger than the illustrative example used in this notebook, but the approach can decrease the search time as many models in the random search will only need a few iterations due to the early stopping.
 
 
 ### 6. Additional notes and readings
