@@ -1,6 +1,6 @@
 ---
-title: "Dimension reduction and clustering on voting data"
-date: "23 March 2021"
+title: "Dimension reduction and clustering of voting data"
+date: "21 March 2022"
 output: html_document
 ---
 

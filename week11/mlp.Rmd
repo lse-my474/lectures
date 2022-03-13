@@ -1,14 +1,28 @@
 ---
 title: "Multilayer perceptron in Keras"
-date: "30 March 2021"
+date: "28 March 2022"
 output: html_document
 ---
 
-To install TensorFlow and Keras: https://tensorflow.rstudio.com/installation/
+--------------------------------------------------------------------------------
+
+#### Preliminary remarks
+
+To install `keras` and run the notebooks from this week:
+
+1. Run `install.packages("keras")`
+2. Load the package with `library("keras")`
+3. Then run the function `install_keras()` in the R-console
+
+Afterwards the code in this notebook should run properly.
+
+For more information on `tensorflow` (the basis of `keras`) see: https://tensorflow.rstudio.com/installation/
+
+--------------------------------------------------------------------------------
 
 Code from: https://github.com/rstudio/keras/blob/master/vignettes/examples/mnist_mlp.R
 
-In this notebook, we will discuss the following example of a MLP classifying the MNIST digits.
+In this notebook, we will discuss the following example of an MLP classifying the MNIST digits.
 
 Loading packages:
 
@@ -23,7 +37,7 @@ batch_size <- 128
 num_classes <- 10
 epochs <- 8
 
-# Using the MNIST data which comes with the Keras package
+# Using the MNIST data which comes with the Keras/Tensorflow packages
 
 # The data, shuffled and split between train and test sets
 c(c(x_train, y_train), c(x_test, y_test)) %<-% dataset_mnist()

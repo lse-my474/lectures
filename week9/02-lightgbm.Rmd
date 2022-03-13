@@ -1,7 +1,7 @@
 ---
 title: "LightGBM"
 author: "Friedrich Geiecke"
-date: "15 March 2021"
+date: "14 March 2022"
 output: html_document
 ---
 
@@ -51,12 +51,14 @@ categoricals <- c()
 # Training dataset
 training_dataset <- lgb.Dataset(data = dataset[training_indices,-ncol(dataset)],
                                 label = dataset[training_indices,ncol(dataset)],
-                                categorical_feature = categoricals)
+                                categorical_feature = categoricals,
+                                params = list(verbose = -1))
 
 # Validation dataset
 validation_dataset <- lgb.Dataset.create.valid(dataset = training_dataset,
                                                data = dataset[validation_indices,-ncol(dataset)],
-                                               label = dataset[validation_indices,ncol(dataset)])
+                                               label = dataset[validation_indices,ncol(dataset)],
+                                               params = list(verbose = -1))
 
 # test_X and test_y as simple matrices/vectors
 test_X <- dataset[test_indices,-ncol(dataset)]
@@ -122,7 +124,7 @@ boosting_importance <- lgb.importance(model, percentage = TRUE)
 lgb.plot.importance(boosting_importance)
 ```
 
-To obtain intuition that these variable importance measures have to be interpreted with care, try to remove `v14` and run the above again. You will find roughly the same accuracy and now another principal component/feature having the highest importance value which was previously hardly visible. This keeps happening if you successively remove features as most of them have a lot of signal for the outcome in this dataset.
+To obtain further intuition that these variable importance measures have to be interpreted with care, try to remove `v14` and run the above again. You will find roughly the same accuracy and now another principal component/feature having the highest importance value which was previously hardly visible. This keeps happening if you successively remove features as most of them have a lot of signal for the outcome in this dataset.
 
 
 ### 3. Random search
@@ -193,18 +195,19 @@ random_search_lgbm <- function(parameter_values_fixed,
     # Transforming the parameter values into a list
     parameter_values_variable <- as.list(search_output[ii, !(colnames(search_output) %in% "score")])
 
-    # Combining with fixed parameters
-    current_params <- c(parameter_values_fixed, parameter_values_variable)
+    # Combining with fixed parameters and seed
+    current_params <- c(parameter_values_fixed, parameter_values_variable, list(seed = seed_int))
     
     # Cross validation
+    sink("/dev/null") # prevents printouts as verbose=-1 seems to have some issues with the current version of lightgbm
     current_cv <- lgb.cv(
       params = current_params,
       data = training_dataset,
       nrounds = 500,
       nfold = 5,
-      seed = seed_int,
-      verbose = -1,
+      verbose = -1
     )
+    sink()
 
     # Storing the score in the final boosting round
     search_output[ii,"score"] <- current_cv$record_evals$valid$auc$eval[[500]]
@@ -320,7 +323,7 @@ Then instead of the last boosting round's evaluation score, we would store the b
 
 ### 6. Additional notes and readings
 
-It is always important to check these advanced models against benchmark models to see whether they actually improve performance for a given problem (or rather decrease it due to small datasets or other particularities). In some cases they can allow to reach the last couple of percent. This can make these models win prediction competitions or translate into considerable financial gains in certain business use cases. Furthermore, the models are very flexible through their wide range of loss functions and hyper-parameters. This makes them useful for approaching many different problems with one framework and careful problem specific tuning.
+It is always important to check these advanced models against benchmark models to see whether they actually improve performance for a given problem (or rather decrease it due overfitting small datasets, bad tuning, etc.). In some cases they can allow to reach the last couple of percent. This can make these models win prediction competitions or translate into considerable financial gains in certain business use cases. Furthermore, the models are very flexible through their wide range of loss functions and hyper-parameters. This makes them useful for approaching many different problems with one framework and careful problem specific tuning.
 
 
 Tuning: https://lightgbm.readthedocs.io/en/latest/Parameters-Tuning.html and e.g. https://towardsdatascience.com/understanding-lightgbm-parameters-and-how-to-tune-them-6764e20c6e5b

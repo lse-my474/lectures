@@ -1,7 +1,7 @@
 ---
 title: "Bagging and random forest"
 author: "Friedrich Geiecke"
-date: "15 March 2021"
+date: "14 March 2022"
 output: html_document
 ---
 
@@ -92,7 +92,7 @@ Bagging is just a random forest with m=p:
 
 ```{r}
 # Estimation
-model_bag = randomForest(class~., data=training_dataset, mtry = 500, m = (ncol(training_dataset)-1), importance=TRUE)
+model_bag = randomForest(class~., data=training_dataset, mtry = (ncol(training_dataset)-1), importance=TRUE)
 
 # Prediction
 test_y_hat_prob_bag = predict(model_bag, newdata = test_X, type="prob")[,2]
@@ -110,7 +110,7 @@ auc(roc(test_y, test_y_hat_prob_bag))
 
 ```{r}
 # Estimation
-model_rf = randomForest(class~., data=training_dataset, mtry = 500, m = round(sqrt(ncol(training_dataset)-1), 0), importance=TRUE)
+model_rf = randomForest(class~., data=training_dataset, mtry = round(sqrt(ncol(training_dataset)-1), 0), importance=TRUE)
 
 # Prediction
 test_y_hat_prob_rf = predict(model_rf, newdata = test_X, type="prob")[,2]
@@ -124,12 +124,32 @@ auc(roc(test_y, test_y_hat_prob_rf))
 ```
 
 
-Variable importance:
+Variable importance in trees:
 
 ```{r fig.height = 4, fig.width = 3}
 varImpPlot(model_rf, main = "Variable importance")
 importance(model_rf)
 ```
+
+__Addendum: Limitations of these variable importance measures__
+
+Let us add two entirely random features which are unrelated to the outcome variable, one with low cardinality (~ few unique values) and one with high cardinality (~ many unique values).
+
+```{r}
+set.seed(24)
+training_dataset_addendum <- training_dataset
+training_dataset_addendum$random_feature_1 <- sample(c("blue", "green", "red"), nrow(training_dataset_addendum), replace = TRUE)
+training_dataset_addendum$random_feature_2 <- runif(nrow(training_dataset_addendum))
+
+model_rf_addendum = randomForest(class~., data=training_dataset_addendum, mtry = round(sqrt(ncol(training_dataset_addendum)-1), 0), importance=TRUE)
+```
+
+```{r fig.height = 4, fig.width = 3}
+varImpPlot(model_rf_addendum, main = "Variable importance")
+importance(model_rf)
+```
+
+Although we know that both features are unrelated to the outcome value, feature 2 in the list. Why is this the case? How does this influence interpreting the relative importances of continuous and categorical features in practise, how categorical features with different amounts of levels? Have a think about this before this week's Q&A.
 
 
 References

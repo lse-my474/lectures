@@ -1,6 +1,6 @@
 ---
 title: "A simple convolutional neural network in Keras"
-date: "30 March 2021"
+date: "28 March 2022"
 output: html_document
 ---
 
