@@ -10,6 +10,7 @@ Loading packages:
 ```{r}
 library("randomForest")
 library("pROC")
+#install.packages("caret")
 #install.packages("caret", dependencies = c("Depends", "Imports"))
 library("caret")
 ```
@@ -22,7 +23,7 @@ Loading the dataset:
 dataset <- read.csv("dataset.csv")
 ```
 
-Training and test split (the validation dataset will be used in the next notebook, but the same datasets make outcomes more comparable):
+Training and test split (the validation dataset will only be used in the next notebook, but the same training/validation/test split makes outcomes more comparable across notebooks):
 
 ```{r}
 # Setting a seed
@@ -88,7 +89,7 @@ auc(roc(test_y, test_y_hat_prob_lr))
 
 ### 3. Bagging
 
-Bagging is just a random forest with m=p:
+Bagging is just a random forest with mtry=p:
 
 ```{r}
 # Estimation
@@ -149,7 +150,7 @@ varImpPlot(model_rf_addendum, main = "Variable importance")
 importance(model_rf)
 ```
 
-Although we know that both features are unrelated to the outcome value, feature 2 in the list. Why is this the case? How does this influence interpreting the relative importances of continuous and categorical features in practise, how categorical features with different amounts of levels? Have a think about this before this week's Q&A.
+Although we know that both features are unrelated to the outcome value, feature 2 is in the list. Why is this the case? How does this influence interpreting the relative importances of continuous and categorical features in practice, how categorical features with different amounts of levels? Have a think about this before this week's Q&A.
 
 
 References
