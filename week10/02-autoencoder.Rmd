@@ -1,0 +1,183 @@
+---
+title: "Nonlinear dimension reduction with autoencoders"
+author: "Friedrich Geiecke"
+date: "21 March 2022"
+output: html_document
+---
+
+--------------------------------------------------------------------------------
+
+#### Preliminary remarks
+
+To install `keras` and run this notebook:
+
+1. Run `install.packages("keras")`
+2. Load the package with `library("keras")`
+3. Then run the function `install_keras()` in the R-console
+
+Afterwards the code in this notebook should run properly.
+
+For more information on `tensorflow` (the basis of `keras`) see: https://tensorflow.rstudio.com/installation/
+
+--------------------------------------------------------------------------------
+
+This file is an outlook on next week's content when we will discuss neural networks. Already basic neural network architectures can also be used for non-linear dimension reduction as described in the [paper](https://www.cs.toronto.edu/~hinton/science.pdf) "Reducing the Dimensionality of Data with Neural Networks" by Hinton and Salakhutdinov (Science, 2006) which was followed by much research on so called "autoencoders". In the following, I have translated the code from a post [here](https://stats.stackexchange.com/questions/190148/building-an-autoencoder-in-tensorflow-to-surpass-pca), which tries to create similar outcomes to the ones in the paper with a somewhat newer and simpler architecture, into R.
+
+
+```{r}
+library("keras")
+library("tensorflow")
+library("ggplot2")
+```
+
+```{r}
+set_random_seed(100)
+```
+
+Loading the MNIST dataset:
+
+```{r}
+# Training and test data (already shuffled)
+c(c(x_train, y_train), c(x_test, y_test)) %<-% dataset_mnist()
+
+# Reshaping 28x28 images to 1x784
+x_train <- array_reshape(x_train, c(nrow(x_train), 784))
+x_test <- array_reshape(x_test, c(nrow(x_test), 784))
+
+# Divide by the max value to transform into [0,1] range
+x_train <- x_train / 255
+x_test <- x_test / 255
+
+cat(nrow(x_train), 'train observations\n')
+cat(nrow(x_test), 'test observations\n')
+```
+
+
+### Principal component analysis (PCA)
+
+Running the PCA:
+
+```{r}
+pca_output <- prcomp(x_train, scale = FALSE)
+# For faster computation, use e.g. only the first 5000 observations for the PCA
+#pca_output <- prcomp(x_train[1:5000,], scale = FALSE)
+```
+
+Storing the first two principal components and reconstructing the original data with them:
+
+```{r}
+# First two principal components
+Z_pca <-pca_output$x[,1:2]
+# Reconstruction of original data from the 2-dimensional PCA representation
+R_pca <- t(t(Z_pca %*% t(pca_output$rotation[,1:2])) + pca_output$center)
+```
+
+
+### Autoencoder
+
+Building the neural network architecture:
+
+```{r}
+autoencoder <- keras_model_sequential()
+autoencoder %>%
+  layer_dense(units = 512, activation = "elu", input_shape = c(784)) %>%  
+  layer_dense(units = 128, activation = "elu") %>%
+  layer_dense(units = 2, activation = "linear", name = "bottleneck") %>%
+  layer_dense(units = 128, activation = "elu") %>%
+  layer_dense(units = 512, activation = "elu") %>%
+  layer_dense(units = 784, activation = "sigmoid") # sigmoid output because
+# true output is also normalised on [0,1]
+
+summary(autoencoder)
+
+autoencoder %>% compile(
+  loss = "mean_squared_error",
+  optimizer = optimizer_adam()
+)
+```
+
+Note how this cleverly transforms a dimension reduction tasks into a supervised learning problem, trying to predict/recreate the original data after having passed it through a bottleneck layer with only two neurons. Note also that already this neural network has almost 1 million parameters which are trained.
+
+Training:
+
+```{r}
+history <- autoencoder %>% fit(
+  x_train, x_train,
+  batch_size = 128,
+  epochs = 8,
+  verbose = 1,
+  validation_data = list(x_test, x_test)
+)
+```
+
+Bottleneck representation values and reconstruction of input data:
+
+```{r}
+# Extracting the encoder part from the model
+encoder <- keras_model(autoencoder$input, get_layer(autoencoder, name = "bottleneck")$output)
+
+Z_ae <- encoder %>% predict(x_train)
+R_ae <- autoencoder %>% predict(x_train)
+```
+
+
+### Visuallsation: Low dimensional representations
+
+```{r}
+# Only first 5000 observations are depicted in order to reduce overplotting
+plot_data = data.frame(z1_pca = Z_pca[1:5000, 1], z2_pca = Z_pca[1:5000, 2],
+                       z1_ae = Z_ae[1:5000, 1], z2_ae = Z_ae[1:5000, 2],
+                       Digit = factor(y_train[1:5000] + 1))
+```
+
+```{r}
+ggplot(plot_data, aes(x = z1_pca, y = z2_pca, color = Digit)) + 
+    geom_point(size = 1) + ggtitle("PCA") +
+  theme(plot.title = element_text(hjust = 0.5)) + xlab("z1") + ylab("z2")
+ggplot(plot_data, aes(x = z1_ae, y = z2_ae, color = Digit)) +
+    geom_point(size = 1) + ggtitle("Autoencoder") + 
+  theme(plot.title = element_text(hjust = 0.5)) + xlab("z1") + ylab("z2")
+```
+
+### Visualisation: Reconstruction of original data
+
+```{r}
+indices <- 1:30 # looking at the first 30 observations
+x_train_plot <- array_reshape(x_train[indices,], c(max(indices), 28, 28))
+x_train_ae_plot <- array_reshape(R_ae[indices,], c(max(indices), 28, 28))
+x_train_pca_plot <- array_reshape(R_pca[indices,], c(max(indices), 28, 28))
+x_train_pca_plot[x_train_pca_plot < 0] <- 0 # some of the PCA reconstructions
+# can have values smaller than 0 or larger than 1
+x_train_pca_plot[x_train_pca_plot > 1] <- 1
+y_train_plot <- y_train[indices]
+
+plot_mnist <- function(x, y) {
+  
+  par(mfcol = c(5,6), mar = rep(1, 4), oma = rep(0.2, 4))
+  x %>% 
+  purrr::array_tree(1) %>%
+  purrr::set_names(y) %>% 
+  purrr::map(as.raster, max = 1) %>%
+  purrr::iwalk(~{plot(.x); title(.y)})
+  
+}
+```
+
+```{r}
+plot_mnist(x_train_plot, y_train_plot)
+plot_mnist(x_train_pca_plot, y_train_plot)
+plot_mnist(x_train_ae_plot, y_train_plot)
+```
+
+Considering that the whole information was stored in only two floating point numbers for each image, the reconstruction of this simple autoencoder is already quite remarkable. Reducing the data to two dimensions makes it possible to plot the lower dimensional representation in a plane, however, if you reduce the data to e.g. 10 dimensions with the autoencoder, then the reconstructed images will already be quite close to the original ones.
+
+Different modifications of autoencoders can e.g. be used for standard dimension reduction, denoising of images, or generative modelling. If you are interested in the topic and would like to study it further after the next week on neural networks, see online discussions like [this](https://towardsdatascience.com/applied-deep-learning-part-3-autoencoders-1c083af4d798) one for a start and for a more rigorous discussion see the deep learning [textbook](https://www.deeplearningbook.org/contents/autoencoders.html) chapter on autoeoncoders. More advanced current autoencoders are e.g. variational autoencoders (see e.g. this [video](https://youtu.be/9zKuYvjFFS8) for a good introduction).
+
+
+### References
+
+- https://stats.stackexchange.com/questions/190148/building-an-autoencoder-in-tensorflow-to-surpass-pca
+- https://www.cs.toronto.edu/~hinton/science.pdf
+- https://github.com/rstudio/keras/blob/master/vignettes/examples/mnist_mlp.R
+- https://tensorflow.rstudio.com/tutorials/advanced/images/cnn/
+- https://www.deeplearningbook.org/contents/autoencoders.html
