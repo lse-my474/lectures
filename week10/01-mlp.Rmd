@@ -1,6 +1,6 @@
 ---
 title: "Multilayer perceptron in Keras"
-date: "28 March 2022"
+date: "22 March 2023"
 output: html_document
 ---
 
@@ -16,7 +16,7 @@ To install `keras` and run the notebooks from this week:
 
 Afterwards the code in this notebook should run properly.
 
-For more information on `tensorflow` (the basis of `keras`) see: https://tensorflow.rstudio.com/installation/
+For more information on `tensorflow` (the basis of `keras`) see: https://tensorflow.rstudio.com/install/index.html
 
 --------------------------------------------------------------------------------
 

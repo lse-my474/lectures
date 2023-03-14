@@ -1,7 +1,7 @@
 ---
 title: "Building and training a simple neural network from scratch in R"
 author: "Friedrich Geiecke"
-date: "28 March 2022"
+date: "22 March 2023"
 output: html_document
 ---
 
@@ -22,6 +22,13 @@ training_X <- as.matrix(dataset[training_indices, !(colnames(training_dataset) %
 training_y <- dataset[training_indices, "median_house_value"]
 test_X <- as.matrix(dataset[-training_indices, !(colnames(training_dataset) %in% "median_house_value")])
 test_y <- dataset[-training_indices, "median_house_value"]
+
+# Standardising features
+mean_X <- apply(training_X, 2, mean)
+sd_X <- apply(training_X, 2, sd)
+# Using only the training mean and sd to standardise - why?
+training_X <- (training_X-mean_X)/sd_X
+test_X <- (test_X-mean_X)/sd_X
 ```
 
 The architecture we will use is a simple one hidden layer feedforward neural network (drawn with http://alexlenail.me/NN-SVG/index.html and annotated):
@@ -43,9 +50,9 @@ hidden_layer_size <- 64
 
 # Storing weights in a list and initialising
 weights_init = list()
-weights_init[["W1"]] <- matrix(rnorm(input_dim*hidden_layer_size, sd = 0.0001), nrow = input_dim, ncol = hidden_layer_size)
+weights_init[["W1"]] <- matrix(rnorm(input_dim*hidden_layer_size, sd = 0.000001), nrow = input_dim, ncol = hidden_layer_size)
 weights_init[["b1"]] <- rep(0, hidden_layer_size)
-weights_init[["W2"]] <- matrix(rnorm(hidden_layer_size, sd = 0.0001), nrow = hidden_layer_size, ncol = 1)
+weights_init[["W2"]] <- matrix(rnorm(hidden_layer_size, sd = 0.000001), nrow = hidden_layer_size, ncol = 1)
 weights_init[["b2"]] <- 0
 ```
 
@@ -191,9 +198,9 @@ Training:
 weights_trained <- train(X = training_X,
                          y = training_y,
                          weights = weights_init,
-                         n_epochs = 5,
+                         n_epochs = 200,
                          batch_size = 512,
-                         learning_rate = 0.01)
+                         learning_rate = 0.05)
 ```
 
 Test set predictions:

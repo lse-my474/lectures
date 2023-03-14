@@ -1,10 +1,10 @@
 ---
 title: "A simple convolutional neural network in Keras"
-date: "28 March 2022"
+date: "22 March 2023"
 output: html_document
 ---
 
-Code from: https://tensorflow.rstudio.com/tutorials/advanced/images/cnn/
+Code by RStudio. Their website recently good updated, but see the references for closest current sources.
 
 In this notebook, we will train a very simple CNN and show that it already performs reasonably well on a task which is much harder than the MNIST classification.
 
@@ -107,4 +107,5 @@ Also here you can train the model for longer, or try out different architectures
 
 References
 
-  - https://tensorflow.rstudio.com/tutorials/advanced/images/cnn/
+  - Original source (inactive at the moment): https://tensorflow.rstudio.com/tutorials/advanced/images/cnn/
+  - Similar current RStudio materials: https://tensorflow.rstudio.com/examples/cifar10_cnn and  https://github.com/rstudio/keras/blob/main/vignettes/examples/cifar10_cnn.R

@@ -1,7 +1,7 @@
 ---
 title: "Nonlinear dimension reduction with autoencoders"
 author: "Friedrich Geiecke"
-date: "21 March 2022"
+date: "29 March 2023"
 output: html_document
 ---
 
@@ -9,7 +9,7 @@ output: html_document
 
 #### Preliminary remarks
 
-To install `keras` and run this notebook:
+If you have installed `keras` already, this notebook should run. Otherwise you can install `keras` with:
 
 1. Run `install.packages("keras")`
 2. Load the package with `library("keras")`
@@ -17,11 +17,11 @@ To install `keras` and run this notebook:
 
 Afterwards the code in this notebook should run properly.
 
-For more information on `tensorflow` (the basis of `keras`) see: https://tensorflow.rstudio.com/installation/
+For more information on `tensorflow` (the basis of `keras`) see: https://tensorflow.rstudio.com/install/index.html
 
 --------------------------------------------------------------------------------
 
-This file is an outlook on next week's content when we will discuss neural networks. Already basic neural network architectures can also be used for non-linear dimension reduction as described in the [paper](https://www.cs.toronto.edu/~hinton/science.pdf) "Reducing the Dimensionality of Data with Neural Networks" by Hinton and Salakhutdinov (Science, 2006) which was followed by much research on so called "autoencoders". In the following, I have translated the code from a post [here](https://stats.stackexchange.com/questions/190148/building-an-autoencoder-in-tensorflow-to-surpass-pca), which tries to create similar outcomes to the ones in the paper with a somewhat newer and simpler architecture, into R.
+This file is an outlook on non-linear dimension reduction. Already basic neural network architectures can also be used for this task as described in the [paper](https://www.cs.toronto.edu/~hinton/science.pdf) "Reducing the Dimensionality of Data with Neural Networks" by Hinton and Salakhutdinov (Science, 2006) which was followed by much research on so called "autoencoders". In the following, I have translated the code of a post [here](https://stats.stackexchange.com/questions/190148/building-an-autoencoder-in-tensorflow-to-surpass-pca), which tries to create similar outcomes to the ones in the paper with a somewhat newer and simpler architecture, into R.
 
 
 ```{r}
@@ -171,7 +171,7 @@ plot_mnist(x_train_ae_plot, y_train_plot)
 
 Considering that the whole information was stored in only two floating point numbers for each image, the reconstruction of this simple autoencoder is already quite remarkable. Reducing the data to two dimensions makes it possible to plot the lower dimensional representation in a plane, however, if you reduce the data to e.g. 10 dimensions with the autoencoder, then the reconstructed images will already be quite close to the original ones.
 
-Different modifications of autoencoders can e.g. be used for standard dimension reduction, denoising of images, or generative modelling. If you are interested in the topic and would like to study it further after the next week on neural networks, see online discussions like [this](https://towardsdatascience.com/applied-deep-learning-part-3-autoencoders-1c083af4d798) one for a start and for a more rigorous discussion see the deep learning [textbook](https://www.deeplearningbook.org/contents/autoencoders.html) chapter on autoeoncoders. More advanced current autoencoders are e.g. variational autoencoders (see e.g. this [video](https://youtu.be/9zKuYvjFFS8) for a good introduction).
+Different modifications of autoencoders can e.g. be used for standard dimension reduction, denoising of images, or generative modelling. If you are interested in the topic and would like to study it further after the next week on neural networks, see online discussions like [this](https://towardsdatascience.com/applied-deep-learning-part-3-autoencoders-1c083af4d798) one for a start and for a more rigorous discussion see the deep learning [textbook](https://www.deeplearningbook.org/contents/autoencoders.html) chapter on autoeoncoders. More advanced current autoencoders are e.g. "variational autoencoders" (see e.g. this [video](https://youtu.be/9zKuYvjFFS8) for an easy to watch introduction).
 
 
 ### References
