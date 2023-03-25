@@ -1,7 +1,7 @@
 ---
 title: "Bagging and random forest"
 author: "Friedrich Geiecke"
-date: "14 March 2022"
+date: "15 March 2023"
 output: html_document
 ---
 
@@ -150,7 +150,7 @@ varImpPlot(model_rf_addendum, main = "Variable importance")
 importance(model_rf)
 ```
 
-Although we know that both features are unrelated to the outcome value, feature 2 is in the list. Why is this the case? How does this influence interpreting the relative importances of continuous and categorical features in practice, how categorical features with different amounts of levels? Have a think about this before this week's Q&A.
+Although we know that both features are unrelated to the outcome value, feature 2 is in the list. Why is this the case? How does this influence interpreting the relative importances of continuous and categorical features in practice, how categorical features with different amounts of levels?
 
 
 References

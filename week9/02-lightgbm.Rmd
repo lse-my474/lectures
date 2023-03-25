@@ -1,7 +1,7 @@
 ---
 title: "LightGBM"
 author: "Friedrich Geiecke"
-date: "14 March 2022"
+date: "15 March 2023"
 output: html_document
 ---
 
@@ -199,7 +199,7 @@ random_search_lgbm <- function(parameter_values_fixed,
     current_params <- c(parameter_values_fixed, parameter_values_variable, list(seed = seed_int))
     
     # Cross validation
-    sink("/dev/null") # prevents printouts as verbose=-1 seems to have some issues with the current version of lightgbm
+    sink(tempfile()) # prevents printouts as verbose=-1 seems to have some issues with the current version of lightgbm
     current_cv <- lgb.cv(
       params = current_params,
       data = training_dataset,
