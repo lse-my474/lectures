@@ -19,6 +19,8 @@ Afterwards the code in this notebook should run properly.
 
 For more information on `tensorflow` (the basis of `keras`) see: https://tensorflow.rstudio.com/install/index.html
 
+For issues resulting from already existing Python installations, the following can be helpful: https://tensorflow.rstudio.com/install/custom
+
 --------------------------------------------------------------------------------
 
 This file is an outlook on non-linear dimension reduction. Already basic neural network architectures can also be used for this task as described in the [paper](https://www.cs.toronto.edu/~hinton/science.pdf) "Reducing the Dimensionality of Data with Neural Networks" by Hinton and Salakhutdinov (Science, 2006) which was followed by much research on so called "autoencoders". In the following, I have translated the code of a post [here](https://stats.stackexchange.com/questions/190148/building-an-autoencoder-in-tensorflow-to-surpass-pca), which tries to create similar outcomes to the ones in the paper with a somewhat newer and simpler architecture, into R.
